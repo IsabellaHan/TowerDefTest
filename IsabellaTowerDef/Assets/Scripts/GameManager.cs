@@ -2,31 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance = null;
 
     public GameObject enemyPrefab;
-    //public Transform enemy2Prefab;
+    public GameObject enemyPrefabTwo;
 
     public float timeBetweenEnemy = 1f;
     public float countdownTimer = 3f;
 
     public int amountOfEnemies = 20;
+    public int enemyCounter = 0;
 
     public float countdown = 3.1f;
+    float waveTwoCountdown = 3.1f;
     float setCountdown;
 
+    public int lives = 5;
+    public int score = 0;
+
     public Text countdownText;
-    public Button clearButton;
+    public Text scoreText;
+    public Button[] allButtons;
     bool startedSpawn = false;
     bool gameStarted = false;
 
-    List<GameObject> listOfEnemy = new List<GameObject>();
+    public List<GameObject> listOfEnemy = new List<GameObject>();
+
+    public Node node;
+
+    AudioSource audio;
+
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else if (instance != this) Destroy(gameObject);
+
+    }
     // Start is called before the first frame update
     void Start()
     {
+        audio = GetComponent<AudioSource>();
         setCountdown = countdown;
+        scoreText.text = "Lives: "+lives.ToString();
     }
 
     // Update is called once per frame
@@ -34,39 +55,76 @@ public class GameManager : MonoBehaviour
     {
         if (gameStarted == true)
         {
-            countdown -= Time.deltaTime;
-            if (countdown >= 0)
+            if (enemyCounter < amountOfEnemies) // start first wave
             {
-                countdownText.text = Mathf.Floor(countdown).ToString();
+                countdown -= Time.deltaTime;
+                if (countdown >= 0)
+                {
+                    countdownText.text = "Wave 1 starting in: \n" +Mathf.Floor(countdown).ToString();
+                }
+                else
+                {
+                    countdownText.text = "  ";
+                }
+                if (countdown <= 0 && startedSpawn == false)
+                {
+                    foreach (Button b in allButtons)
+                    {
+                        b.gameObject.SetActive(true);
+                    }
+                    StartCoroutine(SpawnWave(enemyPrefabTwo));
+                }
             }
-            else
+
+            else // start second wave
             {
-                countdownText.gameObject.SetActive(false);
-            }
-            if (countdown <= 0 && startedSpawn == false)
-            {
-                clearButton.gameObject.SetActive(true);
-                StartCoroutine(SpawnWave());
+                waveTwoCountdown -= Time.deltaTime;
+                //StopCoroutine(SpawnWave(enemyPrefab));
+                if (waveTwoCountdown >= 0)
+                {
+                    countdownText.text = "Wave 2 starting in: \n" + Mathf.Floor(waveTwoCountdown).ToString();
+                    startedSpawn = false;
+                }
+                else {
+                    countdownText.text = "  ";
+                }
+                if (waveTwoCountdown <= 0 && startedSpawn == false)
+                {
+                    StartCoroutine(SpawnWave(enemyPrefabTwo));
+                }
             }
         }
 
+        scoreText.text = "Lives: " + lives.ToString();
+        if (lives <= 0) {
+            scoreText.text = "Lives: " + lives.ToString() + "\n  You LOSE!";
+            StopAllCoroutines();
+            Time.timeScale = 0;
+        }
+
+        if (enemyCounter >= 40 && listOfEnemy.Count == 0) {
+            scoreText.text = "You win!";
+        }
+        
     }
 
     public void StartGame() {
         gameStarted = true;
     }
 
-    IEnumerator SpawnWave() {
+ 
+
+
+    IEnumerator SpawnWave(GameObject enemytype) {
         startedSpawn = true;
         for (int i = amountOfEnemies;  i--> 0;) {
-            //Debug.Log("spawned");
-            SpawnEnemy();
+            SpawnEnemy(enemytype);
             yield return new WaitForSeconds(timeBetweenEnemy);
         }
     }
 
-    void SpawnEnemy() {
-        GameObject en = Instantiate(enemyPrefab, transform.position, transform.rotation) as GameObject;
+    void SpawnEnemy(GameObject enemytype) {
+        GameObject en = Instantiate(enemytype, transform.position, transform.rotation) as GameObject;
         listOfEnemy.Add(en);
     }
 
@@ -74,14 +132,26 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = false;
         startedSpawn = false;
-        countdownText.gameObject.SetActive(true);
+        
         countdown = setCountdown;
-        clearButton.gameObject.SetActive(false);
+        foreach (Button b in allButtons)
+        {
+            b.gameObject.SetActive(false);
+        }
         foreach (GameObject go in listOfEnemy) {
             Destroy(go);
         }
         StopAllCoroutines();
     }
 
- 
+    public void BuildTurret(GameObject tur) {
+        Instantiate(tur, node.transform.position, node.transform.rotation);
+    
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
 }

@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-
+    string projTag = "Projectile";
     public float health;
     public float speed;
-    public Color color;
+
+    public enum EnemyColor
+    {
+        yellow, red
+    }
+    public EnemyColor color;
 
     private Transform target;
     private int currentWPoint = 0;
@@ -16,7 +21,12 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         MeshRenderer ren = GetComponent<MeshRenderer>();
-        ren.material.color = color;
+        if (color == EnemyColor.yellow) {
+            ren.material.color = Color.yellow;
+        }
+        else if (color == EnemyColor.red) { 
+            ren.material.color = Color.red; 
+        }
 
         target = Waypoints.waypoints[0];
 
@@ -31,16 +41,40 @@ public class Enemy : MonoBehaviour
         if (Vector3.Distance(transform.position, target.position) <= 0.2f) {
             GetNextWayPoint();
         }
-    }
 
-    void GetNextWayPoint() {
-        if (currentWPoint >= Waypoints.waypoints.Length - 1)
-        {
-            Player.lives--;
+        if (health <= 0) {
+            GameManager.instance.enemyCounter++;
             Destroy(gameObject);
         }
 
+        Debug.Log(health);
+    }
+
+    void GetNextWayPoint() {
+
         currentWPoint++;
         target = Waypoints.waypoints[currentWPoint];
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag==projTag)
+        {
+            Turret tu = other.gameObject.GetComponent<Projectile>().shotTurret;
+            Projectile po = other.gameObject.GetComponent<Projectile>();
+            if (tu.tag == "Arrow")
+            {
+                health = health - other.gameObject.GetComponent<Projectile>().dmg;
+            }
+            else if (tu.tag == "Cannon") {
+                po.AOEDamage();
+            }
+
+        }
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.listOfEnemy.Remove(this.gameObject);
     }
 }

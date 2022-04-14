@@ -5,12 +5,12 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
 
-    public static int lives = 5;
+    AudioSource audio;
     
     // Start is called before the first frame update
     void Start()
     {
-        
+        audio = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -18,12 +18,16 @@ public class Player : MonoBehaviour
     {
         
     }
-
-    void Win() { 
-    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Enemy") {
+            GameManager.instance.lives--;
+            GameManager.instance.enemyCounter++;
+            audio.Play(0);
+            Destroy(other.gameObject);
+        }
+       
+        
     }
 
-    void Lose() { 
-    
-    }
 }
