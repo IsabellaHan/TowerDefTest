@@ -7,13 +7,11 @@ public class Projectile : MonoBehaviour
     [HideInInspector]
     public Turret shotTurret;
     private Transform target;
-    public GameObject impactObj;
     public float dmg;
 
     private void Start()
     {
         dmg = shotTurret.GetDamage(shotTurret.damage);
-        //Debug.Log(dmg);
     }
     public void FindTarget(Transform t) {
         target = t;
@@ -31,8 +29,6 @@ public class Projectile : MonoBehaviour
         float distance = shotTurret.GetSpeed(shotTurret.spd) * Time.deltaTime;
 
         if (dir.magnitude <= distance) {
-            GameObject fxObj = Instantiate(impactObj,transform.position, transform.rotation);
-            Destroy(fxObj, 1.5f);
             Destroy(gameObject);
             return;
         }
@@ -49,7 +45,6 @@ public class Projectile : MonoBehaviour
                 Enemy e = hitCollider.gameObject.GetComponent<Enemy>();
                 e.health = e.health - dmg;
             }
-            Debug.Log(hitCollider);
         }
     }
 

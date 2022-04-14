@@ -6,8 +6,15 @@ public class Enemy : MonoBehaviour
 {
     string projTag = "Projectile";
     public float health;
-    public float speed;
+    public enum Speed
+    {
+        slow,
+        fast
+    }
+    public Speed spd;
 
+    public GameObject deathParticles;
+    float deathParticleTimer = 0.7f;
     public enum EnemyColor
     {
         yellow, red
@@ -24,19 +31,26 @@ public class Enemy : MonoBehaviour
         if (color == EnemyColor.yellow) {
             ren.material.color = Color.yellow;
         }
-        else if (color == EnemyColor.red) { 
-            ren.material.color = Color.red; 
+        else if (color == EnemyColor.red) {
+            ren.material.color = Color.red;
         }
 
-        target = Waypoints.waypoints[0];
+        //if (Waypoints.waypoints.Length != 0) // if we were using waypoints
+        //{
+        //    target = Waypoints.waypoints[0];
+        //}
+        //else { 
+        target = FindObjectOfType<Player>().transform; 
+       // }
 
+        
     }
 
     // Update is called once per frame
     void Update()
     {
         Vector3 dir = target.position - transform.position;
-        transform.Translate(dir.normalized * speed* 5 * Time.deltaTime, Space.World);
+        transform.Translate(dir.normalized * GetSpeed(spd) * Time.deltaTime, Space.World);
 
         if (Vector3.Distance(transform.position, target.position) <= 0.2f) {
             GetNextWayPoint();
@@ -70,7 +84,22 @@ public class Enemy : MonoBehaviour
                 po.AOEDamage();
             }
 
+            GameObject fxObj = Instantiate(deathParticles, transform.position, transform.rotation);
+            Destroy(fxObj, deathParticleTimer);
+
         }
+    }
+
+    public float GetSpeed(Speed s)
+    {
+        switch (s)
+        {
+            case Speed.slow:
+                return 5;
+            case Speed.fast:
+                return 10;
+        }
+        return 0;
     }
 
     private void OnDestroy()

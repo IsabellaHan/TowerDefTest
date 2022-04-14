@@ -14,8 +14,8 @@ public class Node : MonoBehaviour
     public MeshRenderer ren;
     [HideInInspector]
     public GameObject currentTur;
-
-
+    [HideInInspector]
+    public bool turretIsPlaced = false;
 
     private void Start()
     {

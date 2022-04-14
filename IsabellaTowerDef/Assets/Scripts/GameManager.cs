@@ -7,6 +7,13 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+
+    // I started building without realizing that origin and desitination had to be placed before starting, 
+    // thats why the test level has a setup of waypoints. 
+    // the enemy script had the enemies following a set of waypoints originally. 
+
+
+
     public static GameManager instance = null;
 
     public GameObject enemyPrefab;
@@ -28,6 +35,8 @@ public class GameManager : MonoBehaviour
     public Text countdownText;
     public Text scoreText;
     public Button[] allButtons;
+    public Button spawnButton;
+    public Button homeButton;
     bool startedSpawn = false;
     bool gameStarted = false;
 
@@ -36,6 +45,10 @@ public class GameManager : MonoBehaviour
     public Node node;
 
     AudioSource audio;
+
+    public SpawnLocation spawnManager;
+    public Player player;
+
 
     private void Awake()
     {
@@ -49,6 +62,7 @@ public class GameManager : MonoBehaviour
         audio = GetComponent<AudioSource>();
         setCountdown = countdown;
         scoreText.text = "Lives: "+lives.ToString();
+        
     }
 
     // Update is called once per frame
@@ -110,7 +124,10 @@ public class GameManager : MonoBehaviour
     }
 
     public void StartGame() {
-        gameStarted = true;
+        if (spawnManager != null && player!= null )
+        {
+            gameStarted = true;
+        }
     }
 
  
@@ -125,20 +142,50 @@ public class GameManager : MonoBehaviour
     }
 
     void SpawnEnemy(GameObject enemytype) {
-        GameObject en = Instantiate(enemytype, transform.position, transform.rotation) as GameObject;
+        GameObject en = Instantiate(enemytype, spawnManager.transform.position, spawnManager.transform.rotation) as GameObject;
         listOfEnemy.Add(en);
     }
 
     public void Clear()
     {
-       
-        SceneManager.LoadScene("TestLevel");
+        int scene = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(scene, LoadSceneMode.Single);
     }
 
     public void BuildTurret(GameObject tur) {
-        GameObject t = Instantiate(tur, node.transform.position, node.transform.rotation);
-        listOfTurrets.Add(t);
+        if ( node.turretIsPlaced == false)
+        {
+            GameObject t = Instantiate(tur, node.transform.position, node.transform.rotation);
+            node.turretIsPlaced = true;
+            listOfTurrets.Add(t);
+        }
     }
+
+    // These two functions BuildSpawner and Builddestination can be one, not a copy past
+    public void BuildSpawner(GameObject element) {
+        if (element.gameObject.GetComponent<SpawnLocation>().isPlaced == false && node != null) {
+            GameObject t = Instantiate(element, node.transform.position, node.transform.rotation);
+            spawnManager = t.GetComponent<SpawnLocation>();
+            spawnManager.isPlaced = true;
+            node.turretIsPlaced = true;
+            spawnButton.gameObject.SetActive(false);
+        }
+
+    }
+    public void Builddestination(GameObject element)
+    {
+        if (element.gameObject.GetComponent<Player>().isPlaced == false && node != null)
+        {
+            GameObject t = Instantiate(element, node.transform.position, node.transform.rotation);
+            player = t.GetComponent<Player>();
+            player.isPlaced = true;
+            node.turretIsPlaced = true;
+
+            homeButton.gameObject.SetActive(false);
+        }
+
+    }
+
 
     public void QuitGame()
     {

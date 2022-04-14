@@ -108,7 +108,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 2
-  speed: 2
+  spd: 1
+  deathParticles: {fileID: 1522137858835334284, guid: cc2afb692ec5de143a4b3a1e9cf99d57,
+    type: 3}
   color: 1
 --- !u!54 &-214555781850156380
 Rigidbody:

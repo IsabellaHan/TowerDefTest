@@ -6,18 +6,15 @@ public class Player : MonoBehaviour
 {
 
     AudioSource audio;
-    
+    public bool isPlaced = false;
+
     // Start is called before the first frame update
     void Start()
     {
         audio = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Enemy") {
