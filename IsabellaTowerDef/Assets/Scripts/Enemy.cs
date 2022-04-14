@@ -47,7 +47,7 @@ public class Enemy : MonoBehaviour
             Destroy(gameObject);
         }
 
-        Debug.Log(health);
+       // Debug.Log(health);
     }
 
     void GetNextWayPoint() {

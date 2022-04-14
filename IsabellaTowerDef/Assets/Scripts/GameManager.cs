@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class GameManager : MonoBehaviour
     bool gameStarted = false;
 
     public List<GameObject> listOfEnemy = new List<GameObject>();
-
+    public List<GameObject> listOfTurrets = new List<GameObject>();
     public Node node;
 
     AudioSource audio;
@@ -72,7 +73,7 @@ public class GameManager : MonoBehaviour
                     {
                         b.gameObject.SetActive(true);
                     }
-                    StartCoroutine(SpawnWave(enemyPrefabTwo));
+                    StartCoroutine(SpawnWave(enemyPrefab));
                 }
             }
 
@@ -130,23 +131,13 @@ public class GameManager : MonoBehaviour
 
     public void Clear()
     {
-        gameStarted = false;
-        startedSpawn = false;
-        
-        countdown = setCountdown;
-        foreach (Button b in allButtons)
-        {
-            b.gameObject.SetActive(false);
-        }
-        foreach (GameObject go in listOfEnemy) {
-            Destroy(go);
-        }
-        StopAllCoroutines();
+       
+        SceneManager.LoadScene("TestLevel");
     }
 
     public void BuildTurret(GameObject tur) {
-        Instantiate(tur, node.transform.position, node.transform.rotation);
-    
+        GameObject t = Instantiate(tur, node.transform.position, node.transform.rotation);
+        listOfTurrets.Add(t);
     }
 
     public void QuitGame()
